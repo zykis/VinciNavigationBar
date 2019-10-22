@@ -294,7 +294,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 67U7CVYQJQ;
-				INFOPLIST_FILE = NavigationBarItem/Info.plist;
+				INFOPLIST_FILE = VinciNavigationBar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -312,7 +312,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 67U7CVYQJQ;
-				INFOPLIST_FILE = NavigationBarItem/Info.plist;
+				INFOPLIST_FILE = VinciNavigationBar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

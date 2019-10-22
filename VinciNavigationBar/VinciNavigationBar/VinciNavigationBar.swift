@@ -9,8 +9,20 @@
 import UIKit
 
 class VinciNavigationBar: HitTestView {
+    enum DisplayType {
+        case smallTitleOnly
+        case largeTitleOnly
+        case searchBarOnly
+        case largeTitleWithSearchBar
+    }
+    
     // Public properties
-    public weak var scrollView: UIScrollView?
+    public var displayMode: DisplayType = .largeTitleWithSearchBar
+    public weak var scrollView: UIScrollView? {
+        didSet {
+            self.scrollView?.contentInset = UIEdgeInsets(top: self.expandedHeight + 8.0, left: 0.0, bottom: 0.0, right: 0.0)
+        }
+    }
     public var currentTabIndex: Int = 0 {
         didSet {
             self.updateTitleButtonsColor()
@@ -31,7 +43,16 @@ class VinciNavigationBar: HitTestView {
     public var placeholder: String = "search"
     
     public var expandedHeight: CGFloat {
-        return tabsExpandedHeight + searchBarExpandedHeight + searchViewTopMargin
+        switch displayMode {
+        case .smallTitleOnly:
+            return 0.0
+        case .largeTitleOnly:
+            return tabsExpandedHeight
+        case .searchBarOnly:
+            return searchBarExpandedHeight
+        case .largeTitleWithSearchBar:
+            return tabsExpandedHeight + searchBarExpandedHeight + searchViewTopMargin
+        }
     }
     
     public var offset: CGFloat = 0.0 {
@@ -94,11 +115,20 @@ class VinciNavigationBar: HitTestView {
         let _offset: CGFloat = offset == nil ? self.offset : offset!
         
         var tabsK: CGFloat
-        if -_offset > tabsExpandedHeight {
-            tabsK = 1.0
-        } else {
-            tabsK = max(0, -_offset / tabsExpandedHeight)
+        switch displayMode {
+        case .smallTitleOnly:
+            tabsK = 0.0
+        case .largeTitleOnly,
+             .largeTitleWithSearchBar:
+            if -_offset > tabsExpandedHeight {
+                tabsK = 1.0
+            } else {
+                tabsK = max(0, -_offset / tabsExpandedHeight)
+            }
+        case .searchBarOnly:
+            tabsK = 0.0
         }
+        
         print("tabsK: \(tabsK)")
         return tabsK
     }
@@ -106,11 +136,23 @@ class VinciNavigationBar: HitTestView {
         let _offset: CGFloat = offset == nil ? self.offset : offset!
         
         var searchK: CGFloat
-        if -_offset > tabsExpandedHeight + searchBarExpandedHeight {
-            searchK = 1.0
-        } else {
-            let searchOffset: CGFloat = -_offset - tabsExpandedHeight
-            searchK = max(0, searchOffset / (searchBarExpandedHeight + searchViewTopMargin))
+        switch displayMode {
+        case .smallTitleOnly,
+             .largeTitleOnly:
+            searchK = 0.0
+        case .searchBarOnly:
+            if -_offset > searchBarExpandedHeight {
+                searchK = 1.0
+            } else {
+                searchK = max(0, -_offset / (searchBarExpandedHeight + searchViewTopMargin))
+            }
+        case .largeTitleWithSearchBar:
+            if -_offset > tabsExpandedHeight + searchBarExpandedHeight {
+                searchK = 1.0
+            } else {
+                let searchOffset: CGFloat = -_offset - tabsExpandedHeight
+                searchK = max(0, searchOffset / (searchBarExpandedHeight + searchViewTopMargin))
+            }
         }
         print("searchK: \(searchK)")
         return searchK
@@ -179,6 +221,7 @@ class VinciNavigationBar: HitTestView {
     private var titleViewTrailingConstraint: NSLayoutConstraint!
     private var searchViewHeightAnchorConstraint: NSLayoutConstraint!
     private var searchViewTrailingConstraint: NSLayoutConstraint!
+    private var searchViewLeadingConstraint: NSLayoutConstraint!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -225,7 +268,8 @@ class VinciNavigationBar: HitTestView {
         searchView.searchBar.placeholder = placeholder
         searchView.searchDelegate = searchBarDelegate
         searchView.topAnchor.constraint(equalTo: titleView.bottomAnchor, constant: searchViewTopMargin).isActive = true
-        searchView.leadingAnchor.constraint(equalTo: titleView.leadingAnchor).isActive = true
+        searchViewLeadingConstraint = searchView.leadingAnchor.constraint(equalTo: titleView.leadingAnchor)
+        searchViewLeadingConstraint.isActive = true
         searchViewHeightAnchorConstraint = searchView.heightAnchor.constraint(equalToConstant: 0.0)
         searchViewHeightAnchorConstraint.isActive = true
         searchViewTrailingConstraint = searchView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor)
@@ -270,6 +314,9 @@ class VinciNavigationBar: HitTestView {
         // search view
         searchViewHeightAnchorConstraint.constant = searchBarExpandedHeight * _searchK
         searchViewTrailingConstraint.constant = _rdx - tabsLeftMargin
+        if displayMode == .searchBarOnly {
+            searchViewLeadingConstraint.constant = -_ldx + tabsLeftMargin
+        }
         searchView.update(newHeight: searchBarExpandedHeight * _searchK)
     }
     
@@ -284,7 +331,7 @@ class VinciNavigationBar: HitTestView {
     }
     
     func animateSearchShrink() {
-        let offset = -tabsExpandedHeight
+        let offset = displayMode == .searchBarOnly ? 0.0 : -tabsExpandedHeight
         animateOffsetChange(offset: offset)
     }
     
@@ -315,19 +362,39 @@ class VinciNavigationBar: HitTestView {
         }
         
         let slow = abs(velocity) < 250.0
+        if !slow {
+            return
+        }
         
-        if offset >= -tabsExpandedHeight && offset <= 0 {
+        let inLargeTitle: Bool
+        let inSearchBar: Bool
+        switch displayMode {
+        case .smallTitleOnly:
+            inLargeTitle = false
+            inSearchBar = false
+        case .largeTitleOnly:
+            inLargeTitle = offset >= -expandedHeight && offset <= 0
+            inSearchBar = false
+        case .searchBarOnly:
+            inLargeTitle = false
+            inSearchBar = offset >= -expandedHeight && offset <= 0
+        case .largeTitleWithSearchBar:
+            inLargeTitle = offset >= -tabsExpandedHeight && offset <= 0
+            inSearchBar = offset >= -expandedHeight && offset < -tabsExpandedHeight
+        }
+        
+        if inLargeTitle {
             let _kTabs = kTabs(offset: offset)
-            if _kTabs < 0.5 && slow {
+            if _kTabs < 0.5 {
                 animateTabsShrink()
-            } else if _kTabs >= 0.5 && slow {
+            } else if _kTabs >= 0.5 {
                 animateTabsExpand()
             }
-        } else if offset >= -expandedHeight && offset < -tabsExpandedHeight {
+        } else if inSearchBar {
             let _kSearch = kSearch(offset: offset)
-            if _kSearch < 0.5 && slow {
+            if _kSearch < 0.5 {
                 animateSearchShrink()
-            } else if _kSearch >= 0.5 && slow {
+            } else if _kSearch >= 0.5 {
                 animateSearchExpand()
             }
         }

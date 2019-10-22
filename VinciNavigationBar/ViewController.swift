@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var navigationBar: VinciNavigationBar!
+    @IBOutlet weak var navigationBar: VinciNavigationBar?
     @IBOutlet weak var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -20,7 +20,6 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.contentInset = UIEdgeInsets(top: navigationBar.expandedHeight + 8.0, left: 0.0, bottom: 0.0, right: 0.0)
         tableView.backgroundColor = .clear
         
         let btn1 = UIButton(type: .close)
@@ -31,8 +30,9 @@ class ViewController: UIViewController {
         btn3.setTitle("Done", for: .normal)
         btn3.setTitleColor(.black, for: .normal)
         
-        navigationBar.leftItems = [btn1]
-        navigationBar.rightItems = [btn3, btn2]
+        navigationBar?.displayMode = .largeTitleOnly
+        navigationBar?.leftItems = [btn1]
+        navigationBar?.rightItems = [btn3, btn2]
         
         let chatsButton = UIButton()
         chatsButton.setTitle("Chats", for: .normal)
@@ -45,10 +45,10 @@ class ViewController: UIViewController {
         let largeButton = UIButton()
         largeButton.setTitle("One more large title", for: .normal)
         
-        navigationBar.tabButtons = [chatsButton, groupsButton]
-        navigationBar.scrollView = tableView
-        navigationBar.placeholder = "search for anything"
-        navigationBar.searchBarDelegate = self
+        navigationBar?.tabButtons = [chatsButton, groupsButton]
+        navigationBar?.scrollView = tableView
+        navigationBar?.placeholder = "search for anything"
+        navigationBar?.searchBarDelegate = self
     }
 }
 
@@ -69,13 +69,13 @@ extension ViewController: UITableViewDataSource {
 extension ViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offset: CGFloat = scrollView.contentOffset.y
-        navigationBar.offset = offset
+        navigationBar?.offset = offset
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         let offset: CGFloat = scrollView.contentOffset.y
         let velocity: CGPoint = tableView.panGestureRecognizer.velocity(in: self.view)
-        navigationBar.didEndDragging(offset: offset, velocity: velocity.y)
+        navigationBar?.didEndDragging(offset: offset, velocity: velocity.y)
     }
 }
 
