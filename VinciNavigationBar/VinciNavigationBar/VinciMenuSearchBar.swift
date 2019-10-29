@@ -154,7 +154,7 @@ class VinciMenuSearchBar: UIView {
             cancelButtonRightConstraint = cancelButton.rightAnchor.constraint(equalTo: searchBar.rightAnchor, constant: cancelButton.frame.width)
             cancelButtonRightConstraint.isActive = true
             
-            searchTextField?.rightAnchor.constraint(equalTo: cancelButton.leftAnchor, constant: 0.0).isActive = true
+            searchTextField?.rightAnchor.constraint(equalTo: cancelButton.leftAnchor, constant: -15.0).isActive = true
         }
         
         if searchTextFieldHeightConstraint != nil {

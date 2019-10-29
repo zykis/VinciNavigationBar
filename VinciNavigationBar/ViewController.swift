@@ -17,6 +17,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         
+        initWithCustomTitleView()
+//        initWithLargeTitleAndSearchBar()
+    }
+    
+    private func initWithCustomTitleView() {
         // Do any additional setup after loading the view.
         tableView.delegate = self
         tableView.dataSource = self
@@ -29,9 +34,49 @@ class ViewController: UIViewController {
         let btn3 = UIButton()
         btn3.setTitle("Done", for: .normal)
         btn3.setTitleColor(.black, for: .normal)
+        let btn4 = UIButton(type: .contactAdd)
+        btn4.sizeToFit()
+        let btn5 = UIButton(type: .contactAdd)
+        btn5.sizeToFit()
         
-        navigationBar?.displayMode = .largeTitleOnly
-        navigationBar?.leftItems = [btn1]
+        navigationBar?.displayMode = .smallTitleOnly
+        navigationBar?.leftItems = [btn1, btn4, btn5]
+        navigationBar?.rightItems = [btn3, btn2]
+
+        let customTitleView = UIView()
+        customTitleView.backgroundColor = .red
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "wtf?"
+        label.font = .systemFont(ofSize: 17.0)
+        label.sizeToFit()
+        customTitleView.addSubview(label)
+        label.leadingAnchor.constraint(equalTo: customTitleView.leadingAnchor).isActive = true
+        label.centerYAnchor.constraint(equalTo: customTitleView.centerYAnchor).isActive = true
+        
+        navigationBar?.titleView = customTitleView
+    }
+    
+    private func initWithLargeTitleAndSearchBar() {
+        // Do any additional setup after loading the view.
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.backgroundColor = .clear
+        
+        let btn1 = UIButton(type: .close)
+        btn1.sizeToFit()
+        let btn2 = UIButton(type: .contactAdd)
+        btn2.sizeToFit()
+        let btn3 = UIButton()
+        btn3.setTitle("Done", for: .normal)
+        btn3.setTitleColor(.black, for: .normal)
+        let btn4 = UIButton(type: .contactAdd)
+        btn4.sizeToFit()
+        let btn5 = UIButton(type: .contactAdd)
+        btn5.sizeToFit()
+        
+        navigationBar?.displayMode = .largeTitleWithSearchBar
+        navigationBar?.leftItems = [btn1, btn4, btn5]
         navigationBar?.rightItems = [btn3, btn2]
         
         let chatsButton = UIButton()

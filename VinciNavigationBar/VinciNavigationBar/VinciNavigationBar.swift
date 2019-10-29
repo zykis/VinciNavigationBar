@@ -189,11 +189,25 @@ class VinciNavigationBar: HitTestView {
         sv.axis = .horizontal
         return sv
     }()
-    private var titleView: HitTestView = {
-        let v = HitTestView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
-    }()
+    var titleView: UIView! {
+        willSet {
+            if titleView != nil {
+                titleView.removeFromSuperview()
+            }
+        }
+        didSet {
+            titleView.translatesAutoresizingMaskIntoConstraints = false
+            self.addSubview(titleView)
+            titleViewLeadingConstraint = titleView.leadingAnchor.constraint(equalTo: leftStackView.trailingAnchor, constant: 8.0)
+            titleViewLeadingConstraint.isActive = true
+            titleViewTrailingConstraint = titleView.trailingAnchor.constraint(equalTo: rightStackView.leadingAnchor, constant: -8.0)
+            titleViewTrailingConstraint.isActive = true
+            titleViewTopConstraint = titleView.topAnchor.constraint(equalTo: topAnchor, constant: 0.0)
+            titleViewTopConstraint.isActive = true
+            titleViewHeightConstraint = titleView.heightAnchor.constraint(equalToConstant: bounds.height)
+            titleViewHeightConstraint.isActive = true
+        }
+    }
     private var titleScrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.translatesAutoresizingMaskIntoConstraints = false
@@ -244,15 +258,7 @@ class VinciNavigationBar: HitTestView {
         rightStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12.0).isActive = true
         rightStackView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         
-        self.addSubview(titleView)
-        titleViewLeadingConstraint = titleView.leadingAnchor.constraint(equalTo: leftStackView.trailingAnchor, constant: 8.0)
-        titleViewLeadingConstraint.isActive = true
-        titleViewTrailingConstraint = titleView.trailingAnchor.constraint(equalTo: rightStackView.leadingAnchor, constant: -8.0)
-        titleViewTrailingConstraint.isActive = true
-        titleViewTopConstraint = titleView.topAnchor.constraint(equalTo: topAnchor, constant: 0.0)
-        titleViewTopConstraint.isActive = true
-        titleViewHeightConstraint = titleView.heightAnchor.constraint(equalToConstant: bounds.height)
-        titleViewHeightConstraint.isActive = true
+        titleView = HitTestView()
         
         titleScrollView.addSubview(titleStackView)
         titleStackView.centerYAnchor.constraint(equalTo: titleScrollView.centerYAnchor).isActive = true
@@ -278,7 +284,9 @@ class VinciNavigationBar: HitTestView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        recalculateConstraints()
+        if displayMode != .smallTitleOnly {
+            recalculateConstraints()
+        }
     }
     
     private func recalculateConstraints() {
